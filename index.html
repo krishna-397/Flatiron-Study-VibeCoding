@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Flatiron — An Exploding History</title>
+  <meta name="description" content="A scroll-driven exploded axonometric of the Flatiron Building (1902). Disassemble it, read its history piece by piece, put it back together.">
+
+  <!-- link previews (replace og:image with a screenshot of the exploded state once hosted) -->
+  <meta property="og:title" content="The Flatiron — An Exploding History">
+  <meta property="og:description" content="Scroll to disassemble the Flatiron Building into eight components, each carrying a piece of its 1902 history.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://commons.wikimedia.org/wiki/Special:FilePath/Steichen_flatiron.jpg?width=1200">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- favicon: the wedge, drawn inline -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f7f5ef'/%3E%3Cpolygon points='16,28 6,6 26,6' fill='%2314110d'/%3E%3C/svg%3E">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Tall wrapper: its height creates the scroll distance that
+       drives the whole sequence (title, explosion, reassembly) -->
+  <div class="scroll-space">
+
+    <!-- Sticky stage: stays pinned while the wrapper scrolls past -->
+    <div class="stage">
+
+      <!-- Opening title: alone on blank paper, fades as you scroll -->
+      <div class="intro" id="intro">
+        <h1>THE&nbsp;FLATIRON</h1>
+        <p>an exploding history</p>
+        <div class="scrollcue">&darr; scroll</div>
+      </div>
+
+      <!-- The drawing is generated into this SVG by script.js -->
+      <svg id="axon" viewBox="-800 -620 1600 860" style="opacity:0"
+           xmlns="http://www.w3.org/2000/svg"
+           aria-label="Exploded axonometric drawing of the Flatiron Building with historical notes"></svg>
+
+      <!-- one-time cue shown when the exploded hold is reached -->
+      <div class="inspect-hint" id="inspect-hint">hover to inspect &middot; click for the full story</div>
+
+    </div>
+  </div>
+
+  <!-- dim scrim behind the deep-dive panel -->
+  <div class="scrim" id="scrim"></div>
+
+  <!-- gentle nudge on portrait screens: the plate is landscape -->
+  <div class="rotate-note">This drawing is composed for a landscape screen &mdash; rotate your device or open it on a larger one.</div>
+
+  <!-- Elevator progress rail: descends FL 22 to G as you scroll -->
+  <div class="lift">
+    <div class="lift-rail">
+      <div class="lift-car" id="liftcar">22</div>
+    </div>
+  </div>
+
+  <!-- Deep-dive panel: opens when a component is clicked -->
+  <aside class="dive" id="dive" aria-label="Component detail">
+    <button class="dive-close" id="dive-close" aria-label="Close">&times;</button>
+    <div id="dive-body"></div>
+  </aside>
+
+  <!-- Colophon shown after the reassembly completes -->
+  <section class="colophon">
+    <p>The Flatiron Building (1902), disassembled into eight components &mdash;
+    site, base, three shaft sections, attic, cornice and roof &mdash; each carrying
+    a piece of its history, then put back together. Drawing generated and animated
+    entirely in code: no images in the drawing, no libraries, one font, one color
+    of ink. Period photographs in the detail panels are public domain, via
+    Wikimedia Commons and the Library of Congress.</p>
+    <p class="meta">Krishna &middot; Columbia GSAPP MSCDP &middot; Methods as Practices &middot; 2026</p>
+    <p><a href="#" id="replay" class="replay">&uarr; take it apart again</a></p>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
