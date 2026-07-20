@@ -1,0 +1,24 @@
+id,name,role,age,department,friends,size,color
+FLATIRON,The Flatiron Building,building,1902,architecture,14,34,#14110d
+WEDGE,The Wedge Lot,site,1857,urban fabric,3,18,#8a8377
+BROADWAY,Broadway,site,1600,urban fabric,3,18,#8a8377
+GRID,The 1811 Grid,site,1811,urban fabric,2,18,#8a8377
+ENO,Amos Eno,person,1857,land,1,16,#2b2620
+BLACK,Harry S. Black,person,1901,development,1,20,#2b2620
+FULLERCO,George A. Fuller Company,firm,1901,construction,3,24,#4a443c
+BURNHAM,Daniel H. Burnham,person,1902,architecture,1,22,#2b2620
+BURNHAMCO,D.H. Burnham & Co.,firm,1902,architecture,3,24,#4a443c
+DINKELBERG,Frederick P. Dinkelberg,person,1902,architecture,1,18,#2b2620
+PURDY,Purdy & Henderson,firm,1902,engineering,1,20,#4a443c
+AMBRIDGE,American Bridge Company,firm,1902,steel,1,20,#4a443c
+STEEL,The Riveted Steel Frame,system,1902,structure,3,20,#6b6459
+ATLANTIC,Atlantic Terra Cotta Company,firm,1902,facade,1,20,#4a443c
+TERRA,The Terracotta Skin,system,1902,facade,2,18,#6b6459
+OTIS,Otis Elevator Company,firm,1902,circulation,1,18,#4a443c
+ELEV,The Hydraulic Elevators,system,1902,circulation,2,16,#6b6459
+COWCATCHER,The Cowcatcher,system,1902,retail,2,16,#6b6459
+CIGAR,United Cigar Stores,firm,1902,retail,1,16,#4a443c
+FOLLY,The Press: Burnham's Folly,media,1902,reception,1,16,#a39b8d
+STIEGLITZ,Alfred Stieglitz,person,1903,photography,2,20,#2b2620
+STEICHEN,Edward Steichen,person,1904,photography,2,20,#2b2620
+CAMERA,Pictorialist Photography,media,1903,reception,3,18,#a39b8d

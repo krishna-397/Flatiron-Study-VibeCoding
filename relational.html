@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relational Structures — The Network That Built the Flatiron</title>
+  <meta name="description" content="A D3.js relational structure: the production network of the Flatiron Building, 1811–1904, from CSV data.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f7f5ef'/%3E%3Cpolygon points='16,28 6,6 26,6' fill='%2314110d'/%3E%3C/svg%3E">
+
+  <!-- D3.js for the relational structure -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+
+  <style>
+    /* same Pen & Ink Plate language as the rest of the site */
+    :root {
+      --paper: #f7f5ef;
+      --ink: #14110d;
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+      opacity: 0.05;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/></filter><rect width="300" height="300" filter="url(%23n)"/></svg>');
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 64px 24px 96px 24px;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      letter-spacing: 6px;
+      margin: 0;
+      border-bottom: 3px solid var(--ink);
+      padding-bottom: 10px;
+      display: inline-block;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      margin: 10px 0 0 0;
+    }
+
+    header a { color: var(--ink); }
+
+    .intro {
+      margin: 40px 0 8px 0;
+      font-size: 0.9rem;
+    }
+
+    .plate { margin-top: 56px; }
+
+    .plate h2 {
+      font-size: 0.95rem;
+      letter-spacing: 3px;
+      margin: 0 0 4px 0;
+    }
+
+    .plate .caption {
+      font-size: 0.8rem;
+      margin: 0 0 14px 0;
+      opacity: 0.85;
+    }
+
+    .canvas-holder {
+      border: 1px solid var(--ink);
+      background: var(--paper);
+      line-height: 0;
+    }
+
+    .canvas-holder svg { display: block; width: 100%; height: auto; }
+
+    .hint {
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      opacity: 0.55;
+      margin-top: 6px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 10px;
+      font-size: 0.7rem;
+      letter-spacing: 0.5px;
+      opacity: 0.8;
+    }
+
+    .legend span::before {
+      content: "●";
+      margin-right: 5px;
+    }
+
+    /* node pop-up */
+    .tooltip {
+      position: absolute;
+      background: var(--paper);
+      border: 1.5px solid var(--ink);
+      padding: 10px 12px;
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      max-width: 240px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 30;
+    }
+
+    .tooltip strong {
+      display: block;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 3px;
+      margin-bottom: 5px;
+      letter-spacing: 1px;
+    }
+
+    footer {
+      margin-top: 80px;
+      padding-top: 16px;
+      border-top: 1px solid var(--ink);
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <header>
+      <h1>RELATIONAL&nbsp;STRUCTURES</h1>
+      <p>digital object 03 &mdash; the network that built the flatiron</p>
+      <p><a href="index.html">&larr; the flatiron plate</a> &nbsp;&middot;&nbsp;
+         <a href="canvases.html">spatial canvases</a></p>
+    </header>
+
+    <p class="intro">
+      A building is a relational structure before it is a physical one. This graph, built in
+      D3.js from two CSV files (nodes + edges), maps the network that produced the Flatiron:
+      the grid and the diagonal that manufactured its lot, the developer, architects, and
+      engineers who shaped it, the firms that fabricated its systems, and the press and
+      photographers who turned a mocked office block into an icon. Line weight encodes the
+      strength of each relationship; arrows show direction; node size and tone encode each
+      actor's kind. The data lives in
+      <a href="flatiron-nodes.csv">flatiron-nodes.csv</a> and
+      <a href="flatiron-edges.csv">flatiron-edges.csv</a>, following the course template's
+      exact format.
+    </p>
+
+    <section class="plate">
+      <h2>PLATE &middot; THE PRODUCTION NETWORK, 1811&ndash;1904</h2>
+      <p class="caption">Every actor that had to exist &mdash; streets, laws, firms, people,
+      machines, photographs &mdash; for this building to exist.</p>
+      <div class="canvas-holder" id="d3-holder"></div>
+      <p class="hint">drag nodes &middot; scroll to zoom &middot; drag background to pan &middot; hover for the story of each actor</p>
+      <div class="legend">
+        <span style="color:#14110d">the building</span>
+        <span style="color:#2b2620">people</span>
+        <span style="color:#4a443c">firms</span>
+        <span style="color:#6b6459">systems</span>
+        <span style="color:#8a8377">site &amp; city</span>
+        <span style="color:#a39b8d">media &amp; reception</span>
+      </div>
+    </section>
+
+    <section class="plate">
+      <h2>RELATIONAL STRUCTURES IN MY OWN WORK</h2>
+      <p class="intro" style="margin-top:10px">
+      The lesson I take from this object is that a relational structure can be a
+      <em>generator</em>, not just a description. My interests run through spatial layout at
+      several scales &mdash; furniture in rooms, rooms in plans, parcels on farmland &mdash;
+      and each of these is a graph before it is a drawing: rooms are nodes and required
+      adjacencies are edges (kitchen&ndash;dining strong, bedroom&ndash;street weak), exactly
+      as crops are nodes and rotation compatibilities are edges. A force layout like this one
+      is already a primitive floor-plan generator: let the edges pull what must be adjacent,
+      let the charge push apart what must be separate, and the diagram begins to draw the
+      plan. The same structure could run a farm: fields as nodes, edges weighted by shared
+      water, machinery routes, and rotation sequence. For my project direction, this
+      assignment's graph is a rehearsal &mdash; the next step is letting the relational
+      structure output geometry.
+      </p>
+    </section>
+
+    <footer>
+      Relational Structures assignment &mdash; D3.js, data from CSV &middot; Krishna Goyal
+      &middot; Columbia GSAPP MSCDP &middot; 2026 &middot; part of the same plate series as
+      <a href="index.html" style="color:inherit">The Flatiron</a>.
+    </footer>
+
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+  <script>
+  /* ================================================================
+     THE NETWORK THAT BUILT THE FLATIRON
+     D3 force-directed graph loaded from CSV, per the course
+     template format. Advanced features: zoom + pan, draggable
+     nodes, hover pop-ups, neighborhood highlighting.
+     ================================================================ */
+  const holder = document.getElementById("d3-holder");
+  const width = holder.clientWidth || 940;
+  const height = Math.round(width * 0.68);
+  const INK = "#14110d";
+  const PAPER = "#f7f5ef";
+
+  const svg = d3.select("#d3-holder")
+    .append("svg")
+    .attr("viewBox", [0, 0, width, height])   // responsive: scales with holder
+    .attr("width", width)
+    .attr("height", height);
+
+  // one group under the svg so zoom/pan transforms everything at once
+  const view = svg.append("g");
+
+  // zoom + pan: scroll to zoom, drag the background to pan
+  svg.call(d3.zoom()
+    .scaleExtent([0.4, 3.5])
+    .on("zoom", (event) => view.attr("transform", event.transform)));
+
+  // arrowhead for directed relationships
+  svg.append("defs").append("marker")
+    .attr("id", "arrow")
+    .attr("viewBox", "-0 -5 10 10")
+    .attr("refX", 26)
+    .attr("refY", 0)
+    .attr("orient", "auto")
+    .attr("markerWidth", 5)
+    .attr("markerHeight", 5)
+    .append("path")
+    .attr("d", "M 0,-4 L 8,0 L 0,4")
+    .attr("fill", INK)
+    .attr("fill-opacity", 0.55);
+
+  const tooltip = d3.select("#tooltip");
+
+  // ---- build the graph from parsed CSV rows ----
+  function createGraph(nodesData, edgesData) {
+
+    // convert CSV strings to proper types (same pattern as the tutorial)
+    const nodes = nodesData.map(d => ({
+      id: d.id,
+      name: d.name,
+      role: d.role,
+      year: +d.age,                 // the template's "age" column carries the year here
+      department: d.department,
+      size: +d.size,
+      color: d.color,
+    }));
+
+    const links = edgesData.map(d => ({
+      source: d.source,
+      target: d.target,
+      relationship: d.relationship,
+      detail: d.course,             // the template's "course" column carries the story
+      since: +d.since,
+      strength: +d.strength,
+      type: d.type,
+    }));
+
+    // ---- force simulation ----
+    const simulation = d3.forceSimulation(nodes)
+      .force("link", d3.forceLink(links)
+        .id(d => d.id)
+        .distance(d => 150 - d.strength * 60))   // strong ties sit closer
+      .force("charge", d3.forceManyBody().strength(-420))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("collision", d3.forceCollide().radius(d => d.size + 14));
+
+    // ---- links: ink lines, weight = relationship strength ----
+    const link = view.append("g")
+      .selectAll("line")
+      .data(links)
+      .enter().append("line")
+      .attr("stroke", INK)
+      .attr("stroke-opacity", 0.45)
+      .attr("stroke-width", d => 0.6 + d.strength * 2.2)
+      .attr("stroke-dasharray", d => d.type === "bidirectional" ? "5 4" : null)
+      .attr("marker-end", d => d.type === "directed" ? "url(#arrow)" : null);
+
+    // ---- edge labels: the relationship verb, set along each line ----
+    const edgeLabel = view.append("g")
+      .selectAll("text")
+      .data(links)
+      .enter().append("text")
+      .attr("font-family", "ui-monospace, Consolas, monospace")
+      .attr("font-size", 8.5)
+      .attr("fill", INK)
+      .attr("fill-opacity", 0.45)
+      .attr("text-anchor", "middle")
+      .text(d => d.relationship);
+
+    // ---- nodes: ink circles, size + tone from the CSV ----
+    const node = view.append("g")
+      .selectAll("circle")
+      .data(nodes)
+      .enter().append("circle")
+      .attr("r", d => d.size / 2 + 6)
+      .attr("fill", d => d.color)
+      .attr("stroke", PAPER)
+      .attr("stroke-width", 1.5)
+      .style("cursor", "grab")
+      .call(d3.drag()
+        .on("start", (event, d) => {
+          if (!event.active) simulation.alphaTarget(0.3).restart();
+          d.fx = d.x; d.fy = d.y;
+        })
+        .on("drag", (event, d) => { d.fx = event.x; d.fy = event.y; })
+        .on("end", (event, d) => {
+          if (!event.active) simulation.alphaTarget(0);
+          d.fx = null; d.fy = null;
+        }));
+
+    // ---- node labels ----
+    const label = view.append("g")
+      .selectAll("text")
+      .data(nodes)
+      .enter().append("text")
+      .attr("font-family", "ui-monospace, Consolas, monospace")
+      .attr("font-size", d => d.role === "building" ? 12 : 10)
+      .attr("font-weight", d => d.role === "building" ? "bold" : "normal")
+      .attr("fill", INK)
+      .attr("text-anchor", "middle")
+      .text(d => d.name);
+
+    // ---- pop-ups + neighborhood highlighting ----
+    node.on("mouseover", (event, d) => {
+      link.attr("stroke-opacity", l =>
+        l.source.id === d.id || l.target.id === d.id ? 0.9 : 0.08);
+      edgeLabel.attr("fill-opacity", l =>
+        l.source.id === d.id || l.target.id === d.id ? 0.9 : 0.06);
+      node.attr("fill-opacity", n => {
+        const connected = links.some(l =>
+          (l.source.id === d.id && l.target.id === n.id) ||
+          (l.target.id === d.id && l.source.id === n.id));
+        return n.id === d.id || connected ? 1 : 0.2;
+      });
+      label.attr("fill-opacity", n => {
+        const connected = links.some(l =>
+          (l.source.id === d.id && l.target.id === n.id) ||
+          (l.target.id === d.id && l.source.id === n.id));
+        return n.id === d.id || connected ? 1 : 0.15;
+      });
+      // build the pop-up from the node + its strongest edge stories
+      const stories = links
+        .filter(l => l.source.id === d.id || l.target.id === d.id)
+        .sort((a, b) => b.strength - a.strength)
+        .slice(0, 2)
+        .map(l => `${l.relationship} — ${l.detail}`)
+        .join("<br>");
+      tooltip.html(`<strong>${d.name.toUpperCase()}</strong>
+        ${d.role} · ${d.department} · ${d.year}<br>${stories}`)
+        .style("left", (event.pageX + 14) + "px")
+        .style("top", (event.pageY - 10) + "px")
+        .style("opacity", 1);
+    })
+    .on("mousemove", (event) => {
+      tooltip.style("left", (event.pageX + 14) + "px")
+             .style("top", (event.pageY - 10) + "px");
+    })
+    .on("mouseout", () => {
+      link.attr("stroke-opacity", 0.45);
+      edgeLabel.attr("fill-opacity", 0.45);
+      node.attr("fill-opacity", 1);
+      label.attr("fill-opacity", 1);
+      tooltip.style("opacity", 0);
+    });
+
+    // ---- tick: move everything to its simulated position ----
+    simulation.on("tick", () => {
+      link
+        .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+      edgeLabel
+        .attr("x", d => (d.source.x + d.target.x) / 2)
+        .attr("y", d => (d.source.y + d.target.y) / 2 - 5);
+      node.attr("cx", d => d.x).attr("cy", d => d.y);
+      label
+        .attr("x", d => d.x)
+        .attr("y", d => d.y - d.size / 2 - 12);
+    });
+
+  }
+
+  // ---- embedded copies of the two CSV files ----
+  // The page tries the real flatiron-nodes.csv / flatiron-edges.csv
+  // first (the course workflow, used on the live site). Browsers
+  // block those fetches on file:// pages, so for local preview we
+  // fall back to these identical embedded copies.
+  const NODES_CSV = `id,name,role,age,department,friends,size,color
+FLATIRON,The Flatiron Building,building,1902,architecture,14,34,#14110d
+WEDGE,The Wedge Lot,site,1857,urban fabric,3,18,#8a8377
+BROADWAY,Broadway,site,1600,urban fabric,3,18,#8a8377
+GRID,The 1811 Grid,site,1811,urban fabric,2,18,#8a8377
+ENO,Amos Eno,person,1857,land,1,16,#2b2620
+BLACK,Harry S. Black,person,1901,development,1,20,#2b2620
+FULLERCO,George A. Fuller Company,firm,1901,construction,3,24,#4a443c
+BURNHAM,Daniel H. Burnham,person,1902,architecture,1,22,#2b2620
+BURNHAMCO,D.H. Burnham & Co.,firm,1902,architecture,3,24,#4a443c
+DINKELBERG,Frederick P. Dinkelberg,person,1902,architecture,1,18,#2b2620
+PURDY,Purdy & Henderson,firm,1902,engineering,1,20,#4a443c
+AMBRIDGE,American Bridge Company,firm,1902,steel,1,20,#4a443c
+STEEL,The Riveted Steel Frame,system,1902,structure,3,20,#6b6459
+ATLANTIC,Atlantic Terra Cotta Company,firm,1902,facade,1,20,#4a443c
+TERRA,The Terracotta Skin,system,1902,facade,2,18,#6b6459
+OTIS,Otis Elevator Company,firm,1902,circulation,1,18,#4a443c
+ELEV,The Hydraulic Elevators,system,1902,circulation,2,16,#6b6459
+COWCATCHER,The Cowcatcher,system,1902,retail,2,16,#6b6459
+CIGAR,United Cigar Stores,firm,1902,retail,1,16,#4a443c
+FOLLY,The Press: Burnham's Folly,media,1902,reception,1,16,#a39b8d
+STIEGLITZ,Alfred Stieglitz,person,1903,photography,2,20,#2b2620
+STEICHEN,Edward Steichen,person,1904,photography,2,20,#2b2620
+CAMERA,Pictorialist Photography,media,1903,reception,3,18,#a39b8d`;
+
+  const EDGES_CSV = `source,target,relationship,course,since,strength,type,department
+BROADWAY,GRID,defies,an old road cutting the new grid diagonally,1811,0.7,directed,urban fabric
+GRID,WEDGE,produces,the leftover triangle at 23rd & Fifth,1811,0.9,directed,urban fabric
+BROADWAY,WEDGE,produces,the diagonal edge of the sliver,1811,0.9,directed,urban fabric
+ENO,WEDGE,owns,"the plot known for decades as Eno's flatiron",1857,0.5,directed,land
+WEDGE,FLATIRON,shapes,the plan is the parcel,1901,1.0,directed,architecture
+BLACK,FULLERCO,leads,CEO who bet on the unbuildable lot,1901,0.8,directed,development
+FULLERCO,FLATIRON,develops,builds it as its own headquarters,1901,1.0,directed,construction
+FULLERCO,BURNHAMCO,commissions,Chicago's most powerful architecture firm,1901,0.8,directed,architecture
+BURNHAM,BURNHAMCO,leads,director of the 1893 World's Fair,1902,0.8,directed,architecture
+DINKELBERG,BURNHAMCO,draws for,credited with much of the actual design,1902,0.7,directed,architecture
+BURNHAMCO,FLATIRON,designs,a classical column at skyscraper scale,1902,1.0,directed,architecture
+PURDY,STEEL,engineers,wind bracing for the mocked freak shape,1902,0.9,directed,engineering
+AMBRIDGE,STEEL,fabricates,the riveted cage raised in months,1902,0.8,directed,steel
+STEEL,FLATIRON,holds up,walls carry only themselves,1902,1.0,directed,structure
+ATLANTIC,TERRA,casts,Greek faces and flowers in fireproof clay,1902,0.8,directed,facade
+TERRA,FLATIRON,clads,the skin hung on the frame,1902,0.9,directed,facade
+OTIS,ELEV,builds,water-powered hydraulics,1902,0.7,directed,circulation
+ELEV,FLATIRON,serves,22 floors made rentable,1902,0.7,directed,circulation
+CIGAR,COWCATCHER,leases,retail squeezed from the last square feet,1902,0.6,directed,retail
+COWCATCHER,FLATIRON,attaches to,added against the architects' wishes,1902,0.6,directed,retail
+FOLLY,FLATIRON,mocks,bets the wind would knock it over,1902,0.6,directed,reception
+STIEGLITZ,FLATIRON,photographs,in the 1903 snowstorm,1903,0.9,directed,photography
+STEICHEN,FLATIRON,photographs,the misty 1904 print,1904,0.9,directed,photography
+STIEGLITZ,CAMERA,publishes in,Camera Work circle,1903,0.7,bidirectional,photography
+STEICHEN,CAMERA,publishes in,Camera Work circle,1904,0.7,bidirectional,photography
+CAMERA,FLATIRON,canonizes,office block becomes icon of modern New York,1904,0.9,directed,reception`;
+
+  // try the real CSV files first; fall back to the embedded copies
+  Promise.all([
+    d3.csv("flatiron-nodes.csv"),
+    d3.csv("flatiron-edges.csv"),
+  ]).then(([nodesData, edgesData]) => {
+    createGraph(nodesData, edgesData);
+  }).catch(() => {
+    createGraph(d3.csvParse(NODES_CSV), d3.csvParse(EDGES_CSV));
+  });
+  </script>
+</body>
+</html>

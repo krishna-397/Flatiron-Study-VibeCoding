@@ -1,0 +1,27 @@
+source,target,relationship,course,since,strength,type,department
+BROADWAY,GRID,defies,an old road cutting the new grid diagonally,1811,0.7,directed,urban fabric
+GRID,WEDGE,produces,the leftover triangle at 23rd & Fifth,1811,0.9,directed,urban fabric
+BROADWAY,WEDGE,produces,the diagonal edge of the sliver,1811,0.9,directed,urban fabric
+ENO,WEDGE,owns,"the plot known for decades as Eno's flatiron",1857,0.5,directed,land
+WEDGE,FLATIRON,shapes,the plan is the parcel,1901,1.0,directed,architecture
+BLACK,FULLERCO,leads,CEO who bet on the unbuildable lot,1901,0.8,directed,development
+FULLERCO,FLATIRON,develops,builds it as its own headquarters,1901,1.0,directed,construction
+FULLERCO,BURNHAMCO,commissions,Chicago's most powerful architecture firm,1901,0.8,directed,architecture
+BURNHAM,BURNHAMCO,leads,director of the 1893 World's Fair,1902,0.8,directed,architecture
+DINKELBERG,BURNHAMCO,draws for,credited with much of the actual design,1902,0.7,directed,architecture
+BURNHAMCO,FLATIRON,designs,a classical column at skyscraper scale,1902,1.0,directed,architecture
+PURDY,STEEL,engineers,wind bracing for the mocked freak shape,1902,0.9,directed,engineering
+AMBRIDGE,STEEL,fabricates,the riveted cage raised in months,1902,0.8,directed,steel
+STEEL,FLATIRON,holds up,walls carry only themselves,1902,1.0,directed,structure
+ATLANTIC,TERRA,casts,Greek faces and flowers in fireproof clay,1902,0.8,directed,facade
+TERRA,FLATIRON,clads,the skin hung on the frame,1902,0.9,directed,facade
+OTIS,ELEV,builds,water-powered hydraulics,1902,0.7,directed,circulation
+ELEV,FLATIRON,serves,22 floors made rentable,1902,0.7,directed,circulation
+CIGAR,COWCATCHER,leases,retail squeezed from the last square feet,1902,0.6,directed,retail
+COWCATCHER,FLATIRON,attaches to,added against the architects' wishes,1902,0.6,directed,retail
+FOLLY,FLATIRON,mocks,bets the wind would knock it over,1902,0.6,directed,reception
+STIEGLITZ,FLATIRON,photographs,in the 1903 snowstorm,1903,0.9,directed,photography
+STEICHEN,FLATIRON,photographs,the misty 1904 print,1904,0.9,directed,photography
+STIEGLITZ,CAMERA,publishes in,Camera Work circle,1903,0.7,bidirectional,photography
+STEICHEN,CAMERA,publishes in,Camera Work circle,1904,0.7,bidirectional,photography
+CAMERA,FLATIRON,canonizes,office block becomes icon of modern New York,1904,0.9,directed,reception
