@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geospatial Structures — Broadway Against the Grid</title>
+  <meta name="description" content="A Mapbox GL JS canvas: the squares and slivers Broadway's diagonal produces as it crosses Manhattan's grid.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f7f5ef'/%3E%3Cpolygon points='16,28 6,6 26,6' fill='%2314110d'/%3E%3C/svg%3E">
+
+  <!-- Mapbox GL JS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+
+  <style>
+    :root { --paper: #f7f5ef; --ink: #14110d; --accent: #b8502e; }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: "";
+      position: fixed; inset: 0; z-index: 60;
+      pointer-events: none; opacity: 0.05;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/></filter><rect width="300" height="300" filter="url(%23n)"/></svg>');
+    }
+
+    .wrap { max-width: 980px; margin: 0 auto; padding: 64px 24px 96px 24px; }
+
+    header h1 {
+      font-size: 1.6rem; letter-spacing: 6px; margin: 0;
+      border-bottom: 3px solid var(--ink); padding-bottom: 10px;
+      display: inline-block;
+    }
+    header p { font-size: 0.85rem; margin: 10px 0 0 0; }
+    header a { color: var(--ink); }
+
+    .intro { margin: 40px 0 8px 0; font-size: 0.9rem; }
+    .plate { margin-top: 56px; }
+    .plate h2 { font-size: 0.95rem; letter-spacing: 3px; margin: 0 0 4px 0; }
+    .plate .caption { font-size: 0.8rem; margin: 0 0 14px 0; opacity: 0.85; }
+
+    /* the map, tinted toward paper so it sits in the plate series */
+    .canvas-holder { border: 1px solid var(--ink); position: relative; }
+    #map { width: 100%; height: 620px; }
+    #map .mapboxgl-canvas { filter: saturate(0.18) contrast(1.04) brightness(1.03); }
+
+    .hint { font-size: 0.7rem; letter-spacing: 1px; opacity: 0.55; margin-top: 6px; }
+
+    /* fly-to controls, styled as plate annotations */
+    .tour {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+    }
+    .tour button {
+      font-family: inherit; font-size: 0.7rem; letter-spacing: 1px;
+      background: none; border: 1px solid var(--ink); color: var(--ink);
+      padding: 6px 10px; cursor: pointer; transition: background 0.2s, color 0.2s;
+    }
+    .tour button:hover { background: var(--ink); color: var(--paper); }
+
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 18px; margin-top: 12px;
+      font-size: 0.7rem; letter-spacing: 0.5px; opacity: 0.85;
+    }
+    .legend span::before { content: "●"; margin-right: 6px; }
+
+    /* token warning */
+    .token-warn {
+      position: absolute; inset: 0; z-index: 5;
+      background: var(--paper); display: none;
+      align-items: center; justify-content: center; text-align: center;
+      padding: 40px; font-size: 0.85rem; line-height: 1.7;
+    }
+    .token-warn code { background: #e9e4d8; padding: 1px 5px; }
+
+    /* popups in the plate language */
+    .mapboxgl-popup-content {
+      background: var(--paper);
+      border: 1.5px solid var(--ink);
+      border-radius: 0;
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 11px; line-height: 1.5; padding: 12px 14px;
+      box-shadow: none;
+    }
+    .mapboxgl-popup-content strong {
+      display: block; letter-spacing: 1px;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 3px; margin-bottom: 5px;
+    }
+    .mapboxgl-popup-content .meta { opacity: 0.6; font-size: 10px; }
+    .mapboxgl-popup-tip { display: none; }
+    .mapboxgl-popup-close-button { color: var(--ink); font-size: 16px; }
+
+    footer {
+      margin-top: 80px; padding-top: 16px;
+      border-top: 1px solid var(--ink); font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <header>
+      <h1>GEOSPATIAL&nbsp;STRUCTURES</h1>
+      <p>digital object 04 &mdash; broadway against the grid</p>
+      <p><a href="index.html">&larr; the flatiron plate</a> &nbsp;&middot;&nbsp;
+         <a href="canvases.html">spatial canvases</a> &nbsp;&middot;&nbsp;
+         <a href="relational.html">relational structures</a></p>
+    </header>
+
+    <p class="intro">
+      Plate 04 of my spatial canvases argued that the Flatiron exists because a diagonal
+      crossed a grid. This map tests that claim against real coordinates. Broadway &mdash; a
+      Lenape trail that predates the 1811 plan and refuses it &mdash; cuts north-west across
+      Manhattan, and at every avenue it crosses it produces the same figure: a
+      <strong>bowtie</strong> of two acute triangles. One is usually kept open as a square; the
+      other is usually built on as a sliver. The Flatiron and Madison Square Park are one such
+      pair. Data is authored, and every feature carries a <code>source</code> field &mdash; a
+      practice inherited from my precedent study, where provenance is a column in the data
+      rather than a footnote.
+    </p>
+
+    <section class="plate">
+      <h2>PLATE &middot; THE SQUARES AND THE SLIVERS</h2>
+      <p class="caption">Broadway's crossings from Bowling Green to 106th Street. The Flatiron
+      is extruded to its true height, 87 metres.</p>
+
+      <div class="canvas-holder">
+        <div id="map"></div>
+        <div class="token-warn" id="token-warn">
+          <div>
+            <strong>Mapbox access token required.</strong><br><br>
+            Create a free account at <code>mapbox.com</code>, copy your public token
+            (it begins <code>pk.</code>), and paste it into the marked line near the top of
+            the script in <code>geospatial.html</code>.
+          </div>
+        </div>
+      </div>
+
+      <p class="hint">drag to pan &middot; scroll to zoom &middot; right-drag to tilt and rotate &middot; click any crossing</p>
+
+      <div class="tour">
+        <button data-lng="-73.9897" data-lat="40.7411" data-zoom="16.2" data-pitch="55" data-bearing="-29">the flatiron</button>
+        <button data-lng="-73.9877" data-lat="40.7497" data-zoom="15.4" data-pitch="45" data-bearing="-29">herald &amp; greeley</button>
+        <button data-lng="-73.9862" data-lat="40.7561" data-zoom="15.4" data-pitch="45" data-bearing="-29">times square</button>
+        <button data-lng="-73.9819" data-lat="40.7681" data-zoom="15.2" data-pitch="45" data-bearing="-29">columbus circle</button>
+        <button data-lng="-73.9880" data-lat="40.7550" data-zoom="11.6" data-pitch="0" data-bearing="-29">the whole diagonal</button>
+      </div>
+
+      <div class="legend">
+        <span style="color:#14110d">sliver &mdash; built on</span>
+        <span style="color:#b8502e">square &mdash; kept open</span>
+        <span style="color:#6b6459">bowtie &mdash; both kept</span>
+        <span style="color:#8a8377">broadway</span>
+      </div>
+    </section>
+
+    <section class="plate">
+      <h2>GEOSPATIAL STRUCTURES IN MY OWN WORK</h2>
+      <p class="intro" style="margin-top:10px">
+      This is the digital object closest to my capstone. My research is on Indian farmlands
+      &mdash; how models of farming are outdating faster than the forces acting on them &mdash;
+      and that is a fundamentally geospatial problem: a farm is a parcel, and a parcel is
+      defined by its boundary, its neighbours, its water, and its distance to a market. The
+      same structure I use here to show a diagonal producing leftover triangles is the
+      structure I need to show fragmentation of holdings across generations, catchment areas
+      that ignore property lines, and the gap between where crops are grown and where they are
+      sold. Two inheritances carry directly across: <strong>provenance as a field</strong>, so
+      that a satellite-derived boundary and a surveyed one never read as equally certain in a
+      dataset where much is missing; and the <strong>square/sliver pair</strong> as an analytic
+      figure &mdash; the habit of looking for what a system produces as a by-product, and
+      asking who gets to use it. The next step is layers that are not just legible but
+      comparable: scenarios a community could look at together and argue about.
+      </p>
+    </section>
+
+    <footer>
+      Geospatial Structures assignment &mdash; Mapbox GL JS, GeoJSON &middot; Krishna Goyal
+      &middot; Columbia GSAPP MSCDP &middot; 2026 &middot; part of the same plate series as
+      <a href="index.html" style="color:inherit">The Flatiron</a>.
+    </footer>
+
+  </div>
+
+  <script>
+  /* ================================================================
+     BROADWAY AGAINST THE GRID — Mapbox GL JS
+     Loads broadway-crossings.geojson; falls back to an embedded copy
+     when opened from a file:// page (browsers block those fetches).
+     ================================================================ */
+
+  // ▼▼▼ Mapbox public token (restrict it to your Pages URL in the Mapbox dashboard) ▼▼▼
+  const MAPBOX_TOKEN = "pk.eyJ1Ijoia2czMzAwIiwiYSI6ImNtcndlejJuMTAxdDQyd3B5eHZhbnl3MHgifQ.ETGLj73lv4I8UzLQ97WzsQ";
+  // ▲▲▲ ------------------------------------------------------------------------ ▲▲▲
+
+  const INK = "#14110d", ACCENT = "#b8502e", MID = "#6b6459", GREY = "#8a8377";
+
+  if (!MAPBOX_TOKEN.startsWith("pk.")) {
+    document.getElementById("token-warn").style.display = "flex";
+  } else {
+    mapboxgl.accessToken = MAPBOX_TOKEN;
+
+    const map = new mapboxgl.Map({
+      container: "map",
+      style: "mapbox://styles/mapbox/light-v11",   // pale base, tinted to paper in CSS
+      center: [-73.9897, 40.7411],                 // the Flatiron
+      zoom: 15.4,
+      pitch: 50,
+      bearing: -29,                                // aligns Manhattan's grid to the frame
+      antialias: true,
+    });
+
+    map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), "top-right");
+    map.scrollZoom.setWheelZoomRate(1 / 600);      // gentler zoom
+
+    map.on("load", () => {
+      // try the real GeoJSON file first; fall back to the embedded copy
+      fetch("broadway-crossings.geojson")
+        .then(r => { if (!r.ok) throw new Error("not ok"); return r.json(); })
+        .then(data => build(data))
+        .catch(() => build(EMBEDDED));
+    });
+
+    function build(data) {
+      map.addSource("crossings", { type: "geojson", data: data });
+
+      // ---- Broadway itself: a heavy ink line under everything ----
+      map.addLayer({
+        id: "broadway-casing",
+        type: "line",
+        source: "crossings",
+        filter: ["==", ["get", "kind"], "route"],
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": GREY,
+          "line-width": ["interpolate", ["linear"], ["zoom"], 10, 6, 16, 20],
+          "line-opacity": 0.35,
+        },
+      });
+      map.addLayer({
+        id: "broadway",
+        type: "line",
+        source: "crossings",
+        filter: ["==", ["get", "kind"], "route"],
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": INK,
+          "line-width": ["interpolate", ["linear"], ["zoom"], 10, 1.2, 16, 2.4],
+          "line-dasharray": [4, 3],
+        },
+      });
+
+      // ---- squares: open ground, terracotta wash ----
+      map.addLayer({
+        id: "squares-fill",
+        type: "fill",
+        source: "crossings",
+        filter: ["all",
+          ["==", ["get", "kind"], "square"],
+          ["==", ["geometry-type"], "Polygon"]],
+        paint: { "fill-color": ACCENT, "fill-opacity": 0.16 },
+      });
+      map.addLayer({
+        id: "squares-line",
+        type: "line",
+        source: "crossings",
+        filter: ["all",
+          ["==", ["get", "kind"], "square"],
+          ["==", ["geometry-type"], "Polygon"]],
+        paint: { "line-color": ACCENT, "line-width": 1.4 },
+      });
+
+      // ---- the Flatiron: extruded to its real height ----
+      map.addLayer({
+        id: "flatiron-3d",
+        type: "fill-extrusion",
+        source: "crossings",
+        filter: ["all",
+          ["==", ["get", "kind"], "sliver"],
+          ["==", ["geometry-type"], "Polygon"]],
+        paint: {
+          "fill-extrusion-color": INK,
+          "fill-extrusion-height": ["get", "height"],
+          "fill-extrusion-base": 0,
+          "fill-extrusion-opacity": 0.88,
+        },
+      });
+
+      // ---- the other crossings: ink circles, coloured by what happened ----
+      map.addLayer({
+        id: "crossing-dots",
+        type: "circle",
+        source: "crossings",
+        filter: ["==", ["geometry-type"], "Point"],
+        paint: {
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 5, 16, 11],
+          "circle-color": [
+            "match", ["get", "kind"],
+            "square", ACCENT,
+            "sliver", INK,
+            "bowtie", MID,
+            "circle", MID,
+            GREY,
+          ],
+          "circle-stroke-color": "#f7f5ef",
+          "circle-stroke-width": 1.6,
+        },
+      });
+
+      // ---- labels ----
+      map.addLayer({
+        id: "crossing-labels",
+        type: "symbol",
+        source: "crossings",
+        filter: ["==", ["geometry-type"], "Point"],
+        layout: {
+          "text-field": ["get", "name"],
+          "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Regular"],
+          "text-size": ["interpolate", ["linear"], ["zoom"], 11, 9, 16, 12],
+          "text-offset": [0, 1.5],
+          "text-anchor": "top",
+          "text-letter-spacing": 0.08,
+        },
+        paint: {
+          "text-color": INK,
+          "text-halo-color": "#f7f5ef",
+          "text-halo-width": 1.6,
+        },
+      });
+
+      // ---- click any feature for its story ----
+      const clickable = ["crossing-dots", "flatiron-3d", "squares-fill"];
+      clickable.forEach(layer => {
+        map.on("click", layer, (e) => {
+          const p = e.features[0].properties;
+          new mapboxgl.Popup({ offset: 14, closeButton: true })
+            .setLngLat(e.lngLat)
+            .setHTML(`<strong>${p.name.toUpperCase()}</strong>
+              ${p.note || ""}<br>
+              <span class="meta">${p.avenue || ""}${p.year ? " · " + p.year : ""}<br>
+              source: ${p.source || "unknown"}</span>`)
+            .addTo(map);
+        });
+        map.on("mouseenter", layer, () => map.getCanvas().style.cursor = "pointer");
+        map.on("mouseleave", layer, () => map.getCanvas().style.cursor = "");
+      });
+    }
+
+    // ---- fly-to tour buttons ----
+    document.querySelectorAll(".tour button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        map.flyTo({
+          center: [+btn.dataset.lng, +btn.dataset.lat],
+          zoom: +btn.dataset.zoom,
+          pitch: +btn.dataset.pitch,
+          bearing: +btn.dataset.bearing,
+          duration: 2200,
+          essential: true,
+        });
+      });
+    });
+  }
+
+  /* ---- embedded copy of broadway-crossings.geojson (local preview) ---- */
+  const EMBEDDED = {"type":"FeatureCollection","features":[
+  {"type":"Feature","properties":{"name":"Broadway","kind":"route","note":"An old Lenape trail that predates the 1811 grid and refuses it.","source":"authored trace"},"geometry":{"type":"LineString","coordinates":[[-74.0136,40.7046],[-74.0113,40.7079],[-74.0060,40.7127],[-74.0021,40.7195],[-73.9962,40.7255],[-73.9925,40.7305],[-73.9911,40.7359],[-73.9897,40.7411],[-73.9877,40.7497],[-73.9862,40.7561],[-73.9835,40.7639],[-73.9819,40.7681],[-73.9819,40.7784],[-73.9722,40.7940],[-73.9680,40.8003]]}},
+  {"type":"Feature","properties":{"name":"The Flatiron Building","kind":"sliver","avenue":"Fifth Avenue at 23rd Street","year":1902,"height":87,"note":"The sliver that got a building. 6.5 feet across at the prow.","source":"traced from block edges"},"geometry":{"type":"Polygon","coordinates":[[[-73.98966,40.74149],[-73.99013,40.74077],[-73.98964,40.74058],[-73.98966,40.74149]]]}},
+  {"type":"Feature","properties":{"name":"Madison Square Park","kind":"square","avenue":"Fifth Avenue at 23rd Street","year":1847,"note":"The other half of the same crossing: the sliver's twin became public ground.","source":"traced from park edges"},"geometry":{"type":"Polygon","coordinates":[[[-73.98862,40.74131],[-73.98737,40.74302],[-73.98605,40.74245],[-73.98731,40.74075],[-73.98862,40.74131]]]}},
+  {"type":"Feature","properties":{"name":"Union Square","kind":"square","avenue":"Fourth Avenue at 14th Street","year":1839,"note":"Named for the union of two roads, not two states — Broadway meeting the Bowery.","source":"authored point"},"geometry":{"type":"Point","coordinates":[-73.9911,40.7359]}},
+  {"type":"Feature","properties":{"name":"Greeley & Herald Squares","kind":"bowtie","avenue":"Sixth Avenue at 34th Street","year":1846,"note":"A crossing where both triangles stayed public — a bowtie of two squares.","source":"authored point"},"geometry":{"type":"Point","coordinates":[-73.9877,40.7497]}},
+  {"type":"Feature","properties":{"name":"One Times Square","kind":"sliver","avenue":"Seventh Avenue at 42nd Street","year":1904,"note":"The Flatiron's logic repeated: a newspaper tower on a wedge, two years later.","source":"authored point"},"geometry":{"type":"Point","coordinates":[-73.9862,40.7561]}},
+  {"type":"Feature","properties":{"name":"Father Duffy Square","kind":"square","avenue":"Seventh Avenue at 46th Street","year":1937,"note":"The northern triangle of the same bowtie — kept open, now the red steps.","source":"authored point"},"geometry":{"type":"Point","coordinates":[-73.9855,40.7590]}},
+  {"type":"Feature","properties":{"name":"Columbus Circle","kind":"circle","avenue":"Eighth Avenue at 59th Street","year":1905,"note":"Where the collision was resolved by rounding it off entirely.","source":"authored point"},"geometry":{"type":"Point","coordinates":[-73.9819,40.7681]}},
+  {"type":"Feature","properties":{"name":"Dante Park","kind":"square","avenue":"Columbus Avenue at 63rd Street","year":1897,"note":"A sliver too small to build on, so it became a monument.","source":"authored point"},"geometry":{"type":"Point","coordinates":[-73.9829,40.7727]}},
+  {"type":"Feature","properties":{"name":"Sherman & Verdi Squares","kind":"bowtie","avenue":"Amsterdam Avenue at 71st Street","year":1894,"note":"Another bowtie: two triangles facing each other across the diagonal.","source":"authored point"},"geometry":{"type":"Point","coordinates":[-73.9819,40.7784]}},
+  {"type":"Feature","properties":{"name":"Straus Park","kind":"square","avenue":"West End Avenue at 106th Street","year":1913,"note":"Broadway's last argument with the grid before it leaves the plan.","source":"authored point"},"geometry":{"type":"Point","coordinates":[-73.9680,40.8003]}}
+  ]};
+  </script>
+</body>
+</html>

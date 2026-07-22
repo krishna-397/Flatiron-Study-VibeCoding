@@ -1,0 +1,174 @@
+{
+  "type": "FeatureCollection",
+  "name": "Broadway Against the Grid — the squares and slivers the diagonal produces",
+  "note": "Authored dataset. Point locations are real crossings; the Flatiron polygon is traced from the block's street edges. Each feature carries a 'source' field, after the provenance-as-a-data-field practice in my precedent study.",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Broadway",
+        "kind": "route",
+        "note": "An old Lenape trail that predates the 1811 grid and refuses it.",
+        "source": "authored trace"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-74.0136, 40.7046],
+          [-74.0113, 40.7079],
+          [-74.0060, 40.7127],
+          [-74.0021, 40.7195],
+          [-73.9962, 40.7255],
+          [-73.9925, 40.7305],
+          [-73.9911, 40.7359],
+          [-73.9897, 40.7411],
+          [-73.9877, 40.7497],
+          [-73.9862, 40.7561],
+          [-73.9835, 40.7639],
+          [-73.9819, 40.7681],
+          [-73.9819, 40.7784],
+          [-73.9722, 40.7940],
+          [-73.9680, 40.8003]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "The Flatiron Building",
+        "kind": "sliver",
+        "avenue": "Fifth Avenue at 23rd Street",
+        "year": 1902,
+        "height": 87,
+        "note": "The sliver that got a building. 6.5 feet across at the prow.",
+        "source": "traced from block edges"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-73.98966, 40.74149],
+          [-73.99013, 40.74077],
+          [-73.98964, 40.74058],
+          [-73.98966, 40.74149]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Madison Square Park",
+        "kind": "square",
+        "avenue": "Fifth Avenue at 23rd Street",
+        "year": 1847,
+        "note": "The other half of the same crossing: the sliver's twin became public ground.",
+        "source": "traced from park edges"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-73.98862, 40.74131],
+          [-73.98737, 40.74302],
+          [-73.98605, 40.74245],
+          [-73.98731, 40.74075],
+          [-73.98862, 40.74131]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Union Square",
+        "kind": "square",
+        "avenue": "Fourth Avenue at 14th Street",
+        "year": 1839,
+        "note": "Named for the union of two roads, not two states — Broadway meeting the Bowery.",
+        "source": "authored point"
+      },
+      "geometry": { "type": "Point", "coordinates": [-73.9911, 40.7359] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Greeley & Herald Squares",
+        "kind": "bowtie",
+        "avenue": "Sixth Avenue at 34th Street",
+        "year": 1846,
+        "note": "A crossing where both triangles stayed public — a bowtie of two squares.",
+        "source": "authored point"
+      },
+      "geometry": { "type": "Point", "coordinates": [-73.9877, 40.7497] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "One Times Square",
+        "kind": "sliver",
+        "avenue": "Seventh Avenue at 42nd Street",
+        "year": 1904,
+        "note": "The Flatiron's logic repeated: a newspaper tower on a wedge, two years later.",
+        "source": "authored point"
+      },
+      "geometry": { "type": "Point", "coordinates": [-73.9862, 40.7561] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Father Duffy Square",
+        "kind": "square",
+        "avenue": "Seventh Avenue at 46th Street",
+        "year": 1937,
+        "note": "The northern triangle of the same bowtie — kept open, now the red steps.",
+        "source": "authored point"
+      },
+      "geometry": { "type": "Point", "coordinates": [-73.9855, 40.7590] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Columbus Circle",
+        "kind": "circle",
+        "avenue": "Eighth Avenue at 59th Street",
+        "year": 1905,
+        "note": "Where the collision was resolved by rounding it off entirely.",
+        "source": "authored point"
+      },
+      "geometry": { "type": "Point", "coordinates": [-73.9819, 40.7681] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Dante Park",
+        "kind": "square",
+        "avenue": "Columbus Avenue at 63rd Street",
+        "year": 1897,
+        "note": "A sliver too small to build on, so it became a monument.",
+        "source": "authored point"
+      },
+      "geometry": { "type": "Point", "coordinates": [-73.9829, 40.7727] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sherman & Verdi Squares",
+        "kind": "bowtie",
+        "avenue": "Amsterdam Avenue at 71st Street",
+        "year": 1894,
+        "note": "Another bowtie: two triangles facing each other across the diagonal.",
+        "source": "authored point"
+      },
+      "geometry": { "type": "Point", "coordinates": [-73.9819, 40.7784] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Straus Park",
+        "kind": "square",
+        "avenue": "West End Avenue at 106th Street",
+        "year": 1913,
+        "note": "Broadway's last argument with the grid before it leaves the plan.",
+        "source": "authored point"
+      },
+      "geometry": { "type": "Point", "coordinates": [-73.9680, 40.8003] }
+    }
+  ]
+}
